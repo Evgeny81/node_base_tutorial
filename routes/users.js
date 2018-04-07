@@ -1,33 +1,42 @@
 "use strict";
 
-const fs = require('fs');
-const path = require('path');
 const router = require('express').Router();
-const filePath = path.join(__dirname, '../db', 'users.json');
-let usersData = require(filePath);
 const postValidUserArguments = ["name", "description", "age", "password","username"];
 const requiredPostUserArgs = ["password","username"];
 const putValidUserArguments = ["name", "description", "age"];
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const passRegExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/; // at least 1 number, 1 lowercase and 1 uppercase letter and 6 characters.
-
+const userModel = require('../models').users;
 
 
 /* GET users listing. */
 router.get('/', (req, res, next) => {
-	res.status(200).json(usersData);
+	userModel
+		.all()
+		.then((data) => {
+            res.status(200).json(data);
+		})
+		.catch((err) => {
+            res.status(500).json("Internal Server Error, Please, try later")
+		});
 });
 
 /* GET user by id */
 router.get('/:id', (req, res, next) => {
-	const userId = req.params.id;
-	const user = usersData.find((u) => u.id === userId);
+	const id = req.params.id;
 
-	if (user) {
-		res.status(200).json(user);
-	} else {
-		res.status(404).json("User Not Found");
-	}	
+	userModel
+		.findById(id)
+		.then((user) => {
+            if (user) {
+                res.status(200).json(user);
+            } else {
+                res.status(404).json("User Not Found");
+            }
+        })
+        .catch((err) => {
+            res.status(500).json("Internal Server Error, Please, try later")
+        });
 });
 
 /* POST new User*/
@@ -64,25 +73,25 @@ router.post('/', (req, res, next) => {
 		return;
 	}
 
-	// Add User to usersData.
-	usersData.push( Object.assign(args, { id: `${new Date().getTime()}` }) );
-
-	// Update File
-	fs.writeFile(filePath, JSON.stringify(usersData), (err) => {
-       	if (err) {
+	userModel
+        .create(args)
+        .then((user) => {
+            if (user) {
+                res.status(201).json(user);
+            } else {
+                res.status(404).json("User Not Found");
+            }
+        })
+        .catch((err) => {
             res.status(500).json("Server internal Error, couldn't update the user, please try late");
-            console.log(err);
-            throw err;				
-       	} else {
- 			res.status(201).json("Successfully Created");
-       	}
-    });
+        });
 });
+
+
 
 /* PUT User by id*/
 router.put('/:id', (req, res, next) => {
-	const userId = req.params.id;
-	const user = usersData.find((u) => u.id === userId);
+	const id = req.params.id;
 	const args = req.body;
 
     // Validate Args
@@ -93,54 +102,35 @@ router.put('/:id', (req, res, next) => {
     	return;
     }
 
-	// Veryfy User Existance
-	if (!user) {
-		res.status(404).json("User Not Found");
-		return;
-	}
-
-	// Update usersData.
-	usersData.map((user) => {
-		if (user.id === userId) 
-			user = Object.assign(user, args);
-	
-		return user;
-	});
-
-	// Update File
-	fs.writeFile(filePath, JSON.stringify(usersData), (err) => {
-       	if (err) {
-            res.status(500).json("Server internal Error, couldn't update the user, please try late");
-            console.log(err);
-            throw err;				
-       	} else {
- 			res.status(201).json("Successfully Updated");
-       	}
-    });
+    userModel
+		.update(args, { where: {id} })
+		.then(([affectedCount]) => {
+			if (affectedCount) {
+				res.status(201).json("User Successfuly Updated");
+			} else {
+				res.status(404).json("User Not Found");
+			}
+		})
+		.catch((err) => {
+			res.status(500).json("Server internal Error, couldn't update the user, please try late");
+		});
 });
 
 router.delete("/:id", (req, res, next) => {
-	const userId = req.params.id;
-	const user = usersData.find((u) => u.id === userId);
+	const id = parseInt(req.params.id, 10);
 
-	// Veryfy User Existance
-	if (!user) {
-		res.status(404).json("User Not Found");
-		return;
-	}
-
-    usersData.splice(usersData.findIndex((el) => el.id === userId), 1);
-	
-	// Update File
-	fs.writeFile(filePath, JSON.stringify(usersData), (err) => {
-       	if (err) {
+    userModel
+		.destroy({where: {id}})
+        .then((affectedCount) => {
+            if (affectedCount) {
+                res.status(201).json("User Successfuly Deleted");
+            } else {
+                res.status(404).json("User Not Found");
+            }
+        })
+        .catch((err) => {
             res.status(500).json("Server internal Error, couldn't update the user, please try late");
-            console.log(err);
-            throw err;				
-       	} else {
- 			res.status(200).json("Successfully Updated");
-       	}
-    });
+        });
 });
 
 
