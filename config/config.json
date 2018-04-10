@@ -1,23 +1,32 @@
 {
   "development": {
-    "username": "root",
-    "password": "root",
-    "database": "node_base_tutorial_development",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+      "mysql": {
+          "username": "root",
+          "password": "root",
+          "database": "node_base_tutorial_development",
+          "host": "127.0.0.1",
+          "dialect": "mysql"
+      },
+      "mongodbUrl": "mongodb://localhost:27017/node_base_tutorial_development"
   },
   "test": {
-    "username": "root",
-    "password": "root",
-    "database": "node_base_tutorial_test",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+      "mysql": {
+          "username": "root",
+          "password": "root",
+          "database": "node_base_tutorial_development",
+          "host": "127.0.0.1",
+          "dialect": "mysql"
+      },
+      "mongodbUrl": "mongodb://localhost:27017/node_base_tutorial_development"
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "node_base_tutorial_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql"
+      "mysql": {
+          "username": "root",
+          "password": null,
+          "database": "node_base_tutorial_production",
+          "host": "127.0.0.1",
+          "dialect": "mysql"
+      },
+      "mongodbUrl": "mongodb://localhost:27017/node_base_tutorial_production"
   }
 }

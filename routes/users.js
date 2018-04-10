@@ -6,8 +6,7 @@ const requiredPostUserArgs = ["password","username"];
 const putValidUserArguments = ["name", "description", "age"];
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const passRegExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/; // at least 1 number, 1 lowercase and 1 uppercase letter and 6 characters.
-const userModel = require('../models').users;
-
+const userModel = require('../models').Sequelize.users;
 
 /* GET users listing. */
 router.get('/', (req, res, next) => {
@@ -116,11 +115,12 @@ router.put('/:id', (req, res, next) => {
 		});
 });
 
+
 router.delete("/:id", (req, res, next) => {
-	const id = parseInt(req.params.id, 10);
+    const id = parseInt(req.params.id, 10);
 
     userModel
-		.destroy({where: {id}})
+        .destroy({where: {id}})
         .then((affectedCount) => {
             if (affectedCount) {
                 res.status(201).json("User Successfuly Deleted");
@@ -132,6 +132,5 @@ router.delete("/:id", (req, res, next) => {
             res.status(500).json("Server internal Error, couldn't update the user, please try late");
         });
 });
-
 
 module.exports = router;
