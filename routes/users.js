@@ -8,7 +8,28 @@ const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"
 const passRegExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/; // at least 1 number, 1 lowercase and 1 uppercase letter and 6 characters.
 const userModel = require('../models').Sequelize.users;
 
-/* GET users listing. */
+
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: Endpoint /users
+ */
+
+
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get Users
+ *     description: Get All Users
+ *     tags: [Users]
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Success get all users
+ */
 router.get('/', (req, res, next) => {
 	userModel
 		.all()
@@ -20,7 +41,27 @@ router.get('/', (req, res, next) => {
 		});
 });
 
-/* GET user by id */
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     summary: Get byId
+ *     description: Get user by id
+ *     tags: [Users]
+ *     parameters:
+ *       - name: id
+ *         description: User's id
+ *         in: path
+ *         type: string
+ *         required: true
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Success get user
+ *       400:
+ *         description: Can't find user by id
+ */
 router.get('/:id', (req, res, next) => {
 	const id = req.params.id;
 
@@ -38,7 +79,47 @@ router.get('/:id', (req, res, next) => {
         });
 });
 
-/* POST new User*/
+/**
+ * @swagger
+ * /users:
+ *   post:
+ *     summary: Add User
+ *     description: Add user
+ *     tags: [Users]
+ *     parameters:
+ *       - name: username
+ *         description: User's email
+ *         in: formData
+ *         type: string
+ *         required: true
+ *       - name: password
+ *         description: User's password
+ *         in: formData
+ *         type: string
+ *         required: true
+ *       - name: name
+ *         description: User's name
+ *         in: formData
+ *         type: string
+ *         required: false
+ *       - name: age
+ *         description: User's age
+ *         in: formData
+ *         type: string
+ *         required: false
+ *       - name: description
+ *         description: User's description
+ *         in: formData
+ *         type: string
+ *         required: false
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Success add user
+ *       409:
+ *         description: Invalid arguments
+ */
 router.post('/', (req, res, next) => {
 	const args = req.body;
 
@@ -86,9 +167,44 @@ router.post('/', (req, res, next) => {
         });
 });
 
-
-
-/* PUT User by id*/
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     summary: Update User
+ *     description: Update user by id
+ *     tags: [Users]
+ *     parameters:
+ *       - name: id
+ *         description: User's id
+ *         in: path
+ *         type: string
+ *         required: true
+ *       - name: name
+ *         description: User's name
+ *         in: formData
+ *         type: string
+ *         required: false
+ *       - name: age
+ *         description: User's age
+ *         in: formData
+ *         type: string
+ *         required: false
+ *       - name: description
+ *         description: User's description
+ *         in: formData
+ *         type: string
+ *         required: false
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Success update user
+ *       400:
+ *         description: Can't find user by id
+ *       409:
+ *         description: Invalid arguments
+ */
 router.put('/:id', (req, res, next) => {
 	const id = req.params.id;
 	const args = req.body;
@@ -115,7 +231,27 @@ router.put('/:id', (req, res, next) => {
 		});
 });
 
-
+/**
+ * @swagger
+ * /users/{id}:
+ *   delete:
+ *     summary: Delete User
+ *     description: Delete user by id
+ *     tags: [Users]
+ *     parameters:
+ *       - name: id
+ *         description: User's id
+ *         in: path
+ *         type: string
+ *         required: true
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       201:
+ *         description: User Successfuly Deleted
+ *       400:
+ *         description: User Not Found
+ */
 router.delete("/:id", (req, res, next) => {
     const id = parseInt(req.params.id, 10);
 

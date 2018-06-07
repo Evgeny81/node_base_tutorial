@@ -1,97 +1,82 @@
-## Step 3 cont. (Database / MongoDb)
+## Step 4. (Swagger - Documentation for REST API)
 
-__In this part we are going to add __mongoDb__.__
+__In this part we are going to integrate__ __**Swagger**.__
+ 
+ - `Swagger is an open source software framework backed by a large ecosystem of tools that helps developers design, build, document, and consume RESTful Web services.`
 
-Let's start with instalation first. As with relational, here also we are going to use an ORM tool to make our life way easier. Mongo has it's own very powerful ODM called Mongoose. So let's install it.
+###Let's start with the instalation first. 
 
-To install Mongoose just type.
-> npm install mongoose --save
+To install Swagger just type.
+> npm install swagger-ui-express --save
 
-To install mongoDB you can check https://docs.mongodb.com/manual/installation/ instacrtions. Depending on your Environment instalation may be different.
-In this tutorial we will go with OSX only and use homebrew to install and run MongoDB.
+We are going to use swager jsdoc to make inline docs within our routes
+To install __swagger-jsdoc__ type
+> npm install swagger-jsdoc --save
 
-__INSTRUCTIONS__
 
-> brew update
-> brew install mongodb
-
-Create the __db__ directory. This is where the Mongo data files will live. You can create the directory in the default location.
-> mkdir -p /data/db
-
-Make sure that the /data/db directory has the right permissions
-> sudo chown -R \`id -un\` /data/db
-
-Run MongoDB as a __brew__ service.
-
-To see all service statuses managed by __brew__.
-> brew services list
-
-Start:
-> brew services start mongodb
-
-Also you can use `start`, `restart`, `stop` etc.
 
 
 ### Second
-	let's create two new directories under `model` dir. Since we are going to have more then one database thus, it's beter to keep __models__ in separate directories.
-So let's create two subdirectories under model `model/mongo/` and `model/mysql/`.
-Add `wrappers/` as well as `index.js` for each subdirectory.
-
-Define Mongoose schema for each resource `ex task`.
-
-__ex. schema__
+Let's edit our __app.js__ file to include. 
+	
 ```javascript
 ...
 
-mongoose.Schema({
-    name: {type: String, required: true, unique: true},
-    title: {type: String, required: false},
-    task_items: [{}],
-}, {strict: true});
-
-...
-```
-
-Next we need to define a new route called `tasks.js` and implement all `CRUD` operations. 
-
-__ex. route__
-```javascript
-...
-
-/* PUT Task by id*/
-router.put('/:id', (req, res, next) => {
-    const id = req.params.id;
-    const args = req.body;
-
-    // Validate Args
-    const invalidArguments = Object.keys(args).filter((key) => !putValidUserArguments.includes(key));
-
-    if (invalidArguments.length) {
-        res.status(409).json(`Invalid arguments: ${invalidArguments.join(", ")}`);
-        return;
-    }
-
-    taskModel
-        .findByIdAndRemove(
-            {_id: id},
-            {$set: args},
-            {new: true})
-        .then(() => {
-            res.status(201).json("Task Successfuly Updated");
-        })
-        .catch((err) => {
-            res.status(500).json("Server internal Error, couldn't update the task, please try late");
-        });
+const swaggerSpec = swaggerJSDoc({
+    swaggerDefinition: {
+        info: {
+            title: 'swagger-express-jsdoc', // Title (required)
+            version: '2.0.0', // Version (required)
+        },
+    },
+    apis: ['./routes/*'], // Path to the API docs
 });
 
 ...
+
+app.get('/api-docs.json', function(req, res) {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+});
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+```
+
+### Finally let's use swagger jsdoc to define our API
+
+Let's now choose one of our existing routes __users__ and add swagger description to it 
+
+__/users__ route
+```javascript
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: Endpoint /users
+ */
+
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get Users
+ *     description: Get All Users
+ *     tags: [Users]
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Success get all users
+ */
+
+etc...
 
 ```
 
 
 __To conclude__,
- We integrate mongoDB database to work with our application alongside mysql database. Moreover, we add an ODM tool called Mongoose. Did structure modifications to have both mongoDB and mysql in separate subdirectories.
+ We integrate Swagger to expose our REST Full API Endpoints.
 
 
 __Next__,
- we will integrate Swagger UI. An API documentation tool to expose our REST Full API Endpoints.
+ we will add gulp. To add simple tasks runner to automate basic features

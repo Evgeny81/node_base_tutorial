@@ -6,6 +6,26 @@ const postValidUserArguments = ["name", "title", "task_items"];
 const requiredPostUserArgs = ["name"];
 const putValidUserArguments = ["title", "task_items"];
 
+/**
+ * @swagger
+ * tags:
+ *   name: Tasks
+ *   description: Endpoint /tasks
+ */
+
+/**
+ * @swagger
+ * /tasks:
+ *   get:
+ *     summary: Get Tasks
+ *     description: Get All Tasks
+ *     tags: [Tasks]
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Success get all tasks
+ */
 router.get('/', (req, res, next) => {
     taskModel
         .find({})
@@ -17,6 +37,27 @@ router.get('/', (req, res, next) => {
         });
 });
 
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   get:
+ *     summary: Get byId
+ *     description: Get task by id
+ *     tags: [Tasks]
+ *     parameters:
+ *       - name: id
+ *         description: Task's id
+ *         in: path
+ *         type: string
+ *         required: true
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Success get task
+ *       400:
+ *         description: Can't find task by id
+ */
 router.get('/:id', (req, res, next) => {
     const id = req.params.id;
 
@@ -33,6 +74,38 @@ router.get('/:id', (req, res, next) => {
             res.status(500).json("Internal Server Error, Please, try later")
         });
 });
+
+/**
+ * @swagger
+ * /tasks:
+ *   post:
+ *     summary: Add Task
+ *     description: Add task
+ *     tags: [Tasks]
+ *     parameters:
+ *       - name: name
+ *         description: Task's name
+ *         in: formData
+ *         type: string
+ *         required: true
+ *       - name: title
+ *         description: Task's title
+ *         in: formData
+ *         type: string
+ *         required: false
+ *       - name: task_items
+ *         description: task_items
+ *         in: formData
+ *         type: Array
+ *         required: false
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Success add task
+ *       409:
+ *         description: Invalid arguments
+ */
 
 router.post('/', (req, res, next) => {
     const args = req.body;
@@ -69,7 +142,39 @@ router.post('/', (req, res, next) => {
 });
 
 
-/* PUT Task by id*/
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   put:
+ *     summary: Update Task
+ *     description: Update task by id
+ *     tags: [Tasks]
+ *     parameters:
+ *       - name: id
+ *         description: Task's id
+ *         in: path
+ *         type: string
+ *         required: true
+ *       - name: title
+ *         description: Task's title
+ *         in: formData
+ *         type: string
+ *         required: false
+ *       - name: task_items
+ *         description: task_items
+ *         in: formData
+ *         type: Array
+ *         required: false
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: Success update task
+ *       400:
+ *         description: Can't find task by id
+ *       409:
+ *         description: Invalid arguments
+ */
 router.put('/:id', (req, res, next) => {
     const id = req.params.id;
     const args = req.body;
@@ -95,6 +200,27 @@ router.put('/:id', (req, res, next) => {
         });
 });
 
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   delete:
+ *     summary: Delete Task
+ *     description: Delete task by id
+ *     tags: [Tasks]
+ *     parameters:
+ *       - name: id
+ *         description: Task's id
+ *         in: path
+ *         type: string
+ *         required: true
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       201:
+ *         description: Task Successfuly Deleted
+ *       400:
+ *         description: Task Not Found
+ */
 router.delete("/:id", (req, res, next) => {
     const id = req.params.id;
 
