@@ -5,6 +5,8 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
+const config = require('@config/config');
+
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -29,8 +31,8 @@ const swaggerSpec = swaggerJSDoc({
             title: 'swagger-express-jsdoc', // Title (required)
             version: '3.0.9', // Version (required)
         },
-        host: 'localhost:3000', // Host (optional)
-        basePath: '/api/v1', // Base path (optional)
+        host: config.rest_url(), // Host (optional)
+        basePath: config.rest_endpoint_base_url(), // Base path (optional)
     },
     apis: ['./routes/*'], // Path to the API docs
 });

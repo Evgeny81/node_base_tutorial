@@ -4,16 +4,19 @@
  * Module dependencies.
  */
 
+require('module-alias/register');
 var app = require('../app');
 var debug = require('debug')('node-base-tutorial:server');
 var http = require('http');
 const {sequelize} = require('../models').Sequelize;
+const config = require('@config/config');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+
+var port = normalizePort(config.port);
 app.set('port', port);
 
 /**

@@ -3,15 +3,10 @@
 const fs        = require('fs');
 const path      = require('path');
 const Sequelize = require('sequelize');
-const env       = process.env.NODE_ENV || 'development';
-const config    = require(__dirname + '/../../config/config.json')[env];
+const config    = require('@config/config');
 let db          = {};
 
-if (config.use_env_variable) {
-  var sequelize = new Sequelize(process.env[config.use_env_variable], config.mysql);
-} else {
-  var sequelize = new Sequelize(config.mysql.database, config.mysql.username, config.mysql.password, config.mysql);
-}
+const sequelize = new Sequelize(config.mysql.database, config.mysql.username, config.mysql.password, config.mysql);
 
 fs
   .readdirSync(path.join(__dirname, 'wrapper'))

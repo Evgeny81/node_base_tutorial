@@ -1,8 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const env       = process.env.NODE_ENV || 'development';
-const config    = require(__dirname + '/../../config/config.json')[env];
+const config = require('@config/config');
 
 /*
  * Initialize Mongoose connection

@@ -45,3 +45,5 @@ public/files
 test_data/
 .meta/
 
+# Env file
+.env
