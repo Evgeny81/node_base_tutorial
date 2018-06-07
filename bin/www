@@ -8,7 +8,7 @@ require('module-alias/register');
 var app = require('../app');
 var debug = require('debug')('node-base-tutorial:server');
 var http = require('http');
-const {sequelize} = require('../models').Sequelize;
+const {sequelize} = require('../app/models').Sequelize;
 const config = require('@config/config');
 
 /**

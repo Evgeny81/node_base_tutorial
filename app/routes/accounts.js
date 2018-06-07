@@ -1,7 +1,7 @@
 "use strict";
 
 const router = require('express').Router();
-const accountsModel = require('../models').Sequelize.accounts;
+const accountsModel = require('../models/index').Sequelize.accounts;
 const postValidArgs = ["name", "domain_name"];
 const requiredPostArgs = ["domain_name"];
 const putValidArgs = ["name"];

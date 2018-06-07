@@ -6,7 +6,7 @@ const requiredPostUserArgs = ["password","username"];
 const putValidUserArguments = ["name", "description", "age"];
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const passRegExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/; // at least 1 number, 1 lowercase and 1 uppercase letter and 6 characters.
-const userModel = require('../models').Sequelize.users;
+const userModel = require('../models/index').Sequelize.users;
 
 
 /**

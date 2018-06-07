@@ -1,7 +1,7 @@
 "use strict";
 
 const router = require('express').Router();
-const taskModel = require('../models').Mongoose.Task;
+const taskModel = require('../models/index').Mongoose.Task;
 const postValidUserArguments = ["name", "title", "task_items"];
 const requiredPostUserArgs = ["name"];
 const putValidUserArguments = ["title", "task_items"];

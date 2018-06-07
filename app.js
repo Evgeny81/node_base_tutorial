@@ -8,10 +8,10 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const config = require('@config/config');
 
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-const accountsRouter = require('./routes/accounts');
-const tasksRouter = require('./routes/tasks');
+const indexRouter = require('@app/routes/index');
+const usersRouter = require('@app/routes/users');
+const accountsRouter = require('@app/routes/accounts');
+const tasksRouter = require('@app/routes/tasks');
 
 const app = express();
 
@@ -34,7 +34,7 @@ const swaggerSpec = swaggerJSDoc({
         host: config.rest_url(), // Host (optional)
         basePath: config.rest_endpoint_base_url(), // Base path (optional)
     },
-    apis: ['./routes/*'], // Path to the API docs
+    apis: ['./app/routes/*'], // Path to the API docs
 });
 
 app.use('/', indexRouter);
