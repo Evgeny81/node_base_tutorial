@@ -1,82 +1,75 @@
-## Step 4. (Swagger - Documentation for REST API)
+## Step 5. (Gulp - Task runner)
 
-__In this part we are going to integrate__ __**Swagger**.__
+__In this part we are going to integrate__ __**Gulp**.__
  
- - `Swagger is an open source software framework backed by a large ecosystem of tools that helps developers design, build, document, and consume RESTful Web services.`
+ - `gulp is a toolkit for automating painful or time-consuming tasks in your development workflow, so you can stop messing around and build something.`
 
 ###Let's start with the instalation first. 
 
-To install Swagger just type.
-> npm install swagger-ui-express --save
+To install Gulp just type.
+> npm install gulp-cli -g
 
-We are going to use swager jsdoc to make inline docs within our routes
-To install __swagger-jsdoc__ type
-> npm install swagger-jsdoc --save
+> npm install gulp -D
 
+ - First we need to have gulp-cli to be installed globally
+ - Second install gulp itself as a dev dependency by adding __-D__ when install
+ 
+#### Now let's create a gulpfile
+> touch gulpfile.js   
 
+Add content
+ 
 
-
-### Second
-Let's edit our __app.js__ file to include. 
 	
 ```javascript
-...
-
-const swaggerSpec = swaggerJSDoc({
-    swaggerDefinition: {
-        info: {
-            title: 'swagger-express-jsdoc', // Title (required)
-            version: '2.0.0', // Version (required)
-        },
-    },
-    apis: ['./routes/*'], // Path to the API docs
-});
-
-...
-
-app.get('/api-docs.json', function(req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(swaggerSpec);
-});
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-```
-
-### Finally let's use swagger jsdoc to define our API
-
-Let's now choose one of our existing routes __users__ and add swagger description to it 
-
-__/users__ route
-```javascript
-/**
- * @swagger
- * tags:
- *   name: Users
- *   description: Endpoint /users
- */
+const gulp = require('gulp'),
+    spawn = require('child_process').spawn;
+let node;
 
 /**
- * @swagger
- * /users:
- *   get:
- *     summary: Get Users
- *     description: Get All Users
- *     tags: [Users]
- *     produces:
- *       - application/json
- *     responses:
- *       200:
- *         description: Success get all users
+ * $ gulp server
+ * description: launch the server. If there's a server already running, kill it.
  */
+gulp.task('server', function() {
+    if (node) node.kill();
+    node = spawn('node', ['./bin/www'], {stdio: 'inherit'});
+    node.on('close', function (code) {
+        if (code === 8) {
+            gulp.log('Error detected, waiting for changes...');
+        }
+    });
+});
 
-etc...
+/**
+ * $ gulp
+ * description: start the development environment
+ */
+gulp.task('watch', function() {
+    gulp.run('server');
 
+    gulp.watch(['./**/*.js'], function() {
+        gulp.run('server');
+    })
+});
+
+// clean up if an error goes unhandled.
+process.on('exit', function() {
+    if (node) node.kill();
+});
 ```
 
+We have just defined two gulp tasks called __server__ and __watch__ respectively.
+
+#####Server 
+ Simple task that kills any previously launched node servers and run our __www__ server file located under ./bin/ directory
+ 
+#####Watch
+ Does two things. First, it starts a server by running *task* __server__. Finaly, it appends a watcher to root directory of the project to watch for all .js files under all directories located under root directories under root. __./\*\*/*.js__     
+
+After running __gulp watch__ we will trigger both our server and register a watcher which will restart the server if any modification under each 
 
 __To conclude__,
- We integrate Swagger to expose our REST Full API Endpoints.
-
+ We integrate Gulp to have a simple watcher to be able to restart the server automatically on any .js file change
 
 __Next__,
- we will add gulp. To add simple tasks runner to automate basic features
+We are goin to do some refactoring to escape the mass we have currently in our toutes. 
