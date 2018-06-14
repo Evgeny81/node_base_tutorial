@@ -1,10 +1,8 @@
 "use strict";
 
 const router = require('express').Router();
-const taskModel = require('../models/index').Mongoose.Task;
-const postValidUserArguments = ["name", "title", "task_items"];
-const requiredPostUserArgs = ["name"];
-const putValidUserArguments = ["title", "task_items"];
+const taskModel = require('@models/').Mongoose.Task;
+const taskMiddle = require('@middleware/').Task;
 
 /**
  * @swagger
@@ -107,39 +105,23 @@ router.get('/:id', (req, res, next) => {
  *         description: Invalid arguments
  */
 
-router.post('/', (req, res, next) => {
-    const args = req.body;
+router.post('/',
+    taskMiddle.validatePostTaskArgs,
+    (req, res, next) => {
+        taskModel
+            .create(req.body)
+            .then((user) => {
+                res.status(201).json(user);
+            })
+            .catch((err) => {
+                if (err.code === 11000) {
+                    res.status(409).json("Name Already Exist");
+                    return;
+                }
 
-    // Validate Args
-    const invalidArguments = Object.keys(args).filter((key) => !postValidUserArguments.includes(key));
-
-    if (invalidArguments.length) {
-        res.status(409).json(`Invalid arguments: ${invalidArguments.join(", ")}`);
-        return;
-    }
-
-    // Verify required args existance
-    const missingRequiredArgs = requiredPostUserArgs.filter((key) => !args[key]);
-
-    if (missingRequiredArgs.length) {
-        res.status(409).json(`Missing arguments: ${missingRequiredArgs.join(", ")}`);
-        return;
-    }
-
-    taskModel
-        .create(args)
-        .then((user) => {
-            res.status(201).json(user);
-        })
-        .catch((err) => {
-            if (err.code === 11000) {
-                res.status(409).json("Name Already Exist");
-                return;
-            }
-
-            res.status(500).json("Server internal Error, couldn't update the user, please try late");
-        });
-});
+                res.status(500).json("Server internal Error, couldn't update the user, please try late");
+            });
+    });
 
 
 /**
@@ -175,30 +157,23 @@ router.post('/', (req, res, next) => {
  *       409:
  *         description: Invalid arguments
  */
-router.put('/:id', (req, res, next) => {
-    const id = req.params.id;
-    const args = req.body;
+router.put('/:id',
+    taskMiddle.validatePutTaskArgs,
+    (req, res, next) => {
+        const id = req.params.id;
 
-    // Validate Args
-    const invalidArguments = Object.keys(args).filter((key) => !putValidUserArguments.includes(key));
-
-    if (invalidArguments.length) {
-        res.status(409).json(`Invalid arguments: ${invalidArguments.join(", ")}`);
-        return;
-    }
-    
-    taskModel
-        .findByIdAndRemove(
-            {_id: id},
-            {$set: args},
-            {new: true})
-        .then(() => {
-            res.status(201).json("Task Successfuly Updated");
-        })
-        .catch((err) => {
-            res.status(500).json("Server internal Error, couldn't update the task, please try late");
-        });
-});
+        taskModel
+            .findByIdAndRemove(
+                {_id: id},
+                {$set: req.body},
+                {new: true})
+            .then(() => {
+                res.status(201).json("Task Successfuly Updated");
+            })
+            .catch((err) => {
+                res.status(500).json("Server internal Error, couldn't update the task, please try late");
+            });
+    });
 
 /**
  * @swagger

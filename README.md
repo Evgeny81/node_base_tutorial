@@ -1,107 +1,128 @@
-## Step 6. (project structure - .env, configurations, aliases)
+## Step 7. (Middlewares)
 
-__In this part we are going to do some refactoring to change the application structure.__
-__In addition we are going to define .env as well as centralized configurations for different environments.__
+__In this part we are going to make some improvemnets. We will get familiar with Express powerfull middlewares.__
 
-Let's get started by creating an new directory called __app__ under root and move the source code of the api to app
-
-First, add __config__ folder under newly created __app__ directory.
-Second, create a configuration file called __config.js__ under _config_ dir.
-
-Now, it's time to install a small library to handle .env data.
-
-Run
->npm install dotenv --save
-
-This will give an ability to create a file called .env under the root directory and keep sme general environment variables
-
-Run
-> touch .env
-Make sure to include it to __gitignore__ file. to exclude from the commit. It's necessary since .env is environment specific. 
-
-Add __.env__ content.
-```javascript
-HOST=localhost
-PORT=3000
-WEB_HOST=localhost
-WEB_PORT=9000
-PROTOCOL=https
-
-DB_MYSQL_DIALECT=mysql
-DB_MYSQL_MULTIPLESTATEMENTS=true
-DB_MYSQL_HOST=127.0.0.1
-DB_MYSQL_USERNAME=root
-DB_MYSQL_PASS=root
-DB_MYSQL_NAME=node_base_tutorial
+###So what is middleware in ExpressJs
+```
+Middleware functions are functions that have access to the request object (req),
+the response object (res), and the next middleware function in the application’s
+request-response cycle.The next middleware function is commonly denoted by a variable named next.
 ```
 
+__Middleware functions can perform the following tasks:__
 
-__config.js__ Examle
-```javascript
-const config = {
-    /* DEVELOPMENT ENV */
-    development: Object.assign({
-        host: '127.0.0.1', // local host to run the server
-        port: '9000',      // local port to run the server
-        web_host: 'localhost',
-        web_port: '3000',
-        protocol: 'https',
-        mysql: {
-            dialect: 'mysql',
-            multipleStatements: true,
-            host: '127.0.0.1',
-            user: 'root',
-            password: '',
-            database: 'node_base_tutorial'
-        },
-        mongodbUrl: "mongodb://localhost:27017/node_base_tutorial_development",
-        swagger_url: '/swagger',
-        api_version: 'v1',
-        rest_endpoint_base_url () {
-            return `/api/${this.api_version}`;
-        },
-        rest_url () {
-            return `${this.protocol}://${this.host}:${this.port}`;
-        },
-        website_url () {
-            return `${this.protocol}://${this.web_host}:${this.web_port}`;
-        },
+    - Execute any code.
+    - Make changes to the request and the response objects.
+    - End the request-response cycle.
+    - Call the next middleware function in the stack.
+    
+>If the current middleware function does not end the request-response cycle, it must call next() to pass control to the next middleware function. Otherwise, the request will be left hanging.
 
-    }, localEnv)
-...
+
+#####An Express application can use the following types of middleware:
+
+    - Application-level middleware
+    - Router-level middleware
+    - Error-handling middleware
+    - Built-in middleware
+    - Third-party middleware
+
+
+>For more info please, visit  [express middlewares](https://expressjs.com/en/guide/using-middleware.html)
+
+
+
+
+
+####Ok It's time to dive into the code.
+> NOTE, we are going to concentrate mainly on __Router-level middlewares__ in this tutorial
+
+
+Let's use middlewares to move __validation__ related specific logic to shared reusable modules
+ - First, create an new directory called __middleware__ under the __app__ folder
+ - Second, create .js file called __account.middleware.js__ with the content
+ ```javascript
+"use strict";
+
+const oneValidation = require('one-validation');
+const expectedAccountArguments = ["name", "domain_name"];
+
+module.exports = {
+
+    /**
+     * @access public
+     * @param req
+     * @param res
+     * @param next
+     * @description Check the correctness of arguments for account creation.
+     * @returns {void}
+     */
+    validateAccountArgs(req, res, next) {
+        const missingArgs = expectedAccountArguments.filter((key) => !(req.body[key] || req.body[key] === 0) );
+
+        // Validate Expected Args Existence.
+        if (missingArgs.length)
+            return res.status(400).json({
+                statusCode: 400,
+                errorCode: 'MissingRequiredBodyParameter',
+                errorMessage: `Missing args: ${missingArgs}.`
+            });
+
+        // Validate Domain Name
+        if (!oneValidation['domain'].test(req.body.domain_name))
+            return res.status(400).json({
+                statusCode: 400,
+                errorCode: 'InvalidInput',
+                errorMessage: 'The `domain_name` is not valid.'
+            });
+
+        return next();
+    }
+};
+``` 
+
+ - Next remove validation part from the route itself and just pass an appropriate middleware as follows
+  
+ ```javascript
+router.post('/',
+    accountMiddle.validateAccountArgs,
+    (req, res, next) => {
+        accountsModel
+            .create(req.body)
+            .then((data) => {
+            })
+            .catch((err) => {
+            });
+    });
 ```
 
-####Note
-Unfortunately, we can't use a new config only for all cases since, Sequelize db:<command> commands relay on config file located under root/config/config
-Thus, we have to keep two config files one depending another.
-
-###Aliases
-Create aliases of directories and register custom module paths in NodeJS like a boss
-
-So __No more shit-coding paths in Node like so__
-```require('../../../../some/very/deep/module')``` 
-
-####To Include node Aliases Run
->npm install module-alias --save
-
-Add your custom configuration to your __package.json__ (in your application's root)
-```javascript
-  "_moduleAliases": {
-    "@root": ".",
-    "@app": "./app",
-    "@config": "./app/config"
-  },
-````
-Then add this line at the very main file of your app, before any code
-include 
-```javascript
-require('module-alias/register')
+ - Even we can pass multiple middlewares in order. 
+ 
+ ```javascript
+ router.post('/',
+     userMiddle.validatePostUserArgs,
+     passwordMiddle.isValidPassword,
+     (req, res, next) => {
+         userModel
+             .create(req.body)
+             .then((user) => {
+             })
+             .catch((err) => {
+             });
+     });
 ```
+
+In above example the first middleware will make sure that the args are valid then the second will validate the password.
+Note that in case args are not valid then the second middleware will not be called and the request will terminated by sending an unsuccess error status to the client,
+As you already may noticed our general call back function itself is a usual middleware having passed next function as it's 3 rd argument.
+
 
 
 
 __To conclude__,
- We add .env, configuration as well as aliases
-
+ We added Router-level middlewares to move validation process to separate reusable module blocks.
+ Moreover, we have learn how to work with express middlewares and that the router callback function is itself a middleware.
+ 
+ 
 __Next__,
-We are goin to do farther file structure refactoring move routes, models to app directory.
+We are goin to add proper Error handling as well as modify application structure a little bit

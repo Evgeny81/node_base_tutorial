@@ -1,11 +1,8 @@
 "use strict";
 
 const router = require('express').Router();
-const accountsModel = require('../models/index').Sequelize.accounts;
-const postValidArgs = ["name", "domain_name"];
-const requiredPostArgs = ["domain_name"];
-const putValidArgs = ["name"];
-const domainRegExp = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
+const accountsModel = require('@models/index').Sequelize.accounts;
+const accountMiddle = require('@middleware/').Account;
 
 /**
  * @swagger
@@ -103,50 +100,26 @@ router.get('/', (req, res, next) => {
  *       409:
  *         description: Invalid arguments
  */
-router.post('/', (req, res, next) => {
-	const args = req.body;
-
-    // Validate Args
-    const invalidArgs = Object.keys(args).filter((key) => !postValidArgs.includes(key));
-
-    if (invalidArgs.length) {
-    	res.status(409).json(`Invalid arguments: ${invalidArgs.join(", ")}`);
-    	return;
-    }
-
-    // Verify required args existance
-    const missingRequiredArgs = requiredPostArgs.filter((key) => !args[key]);
-
-    if (missingRequiredArgs.length) {
-    	res.status(409).json(`Missing arguments: ${missingRequiredArgs.join(", ")}`);
-    	return;
-    }
-
-    // Check Validity of required Args
-
-    // Validate Domain name
-    if (!domainRegExp.test(args.domain_name)) {
-		res.status(409).json(`Domain Name is not valid`);
-		return;
-	}
-
-    accountsModel
-        .create(args)
-        .then((data) => {
-            if (data) {
-                res.status(201).json(data);
-            } else {
-                res.status(404).json("Account Not Found");
-            }
-        })
-        .catch((err) => {
-            res.status(500).json("Server internal Error, couldn't update the user, please try late");
-        });
-});
+router.post('/',
+    accountMiddle.validateAccountArgs,
+    (req, res, next) => {
+        accountsModel
+            .create(req.body)
+            .then((data) => {
+                if (data) {
+                    res.status(201).json(data);
+                } else {
+                    res.status(404).json("Account Not Found");
+                }
+            })
+            .catch((err) => {
+                res.status(500).json("Server internal Error, couldn't update the user, please try late");
+            });
+    });
 
 /**
  * @swagger
- * /accounts/{domain_name}:
+ * /accounts/{id}:
  *   put:
  *     summary: Update Account
  *     description: Update Account by domain_name
@@ -172,20 +145,11 @@ router.post('/', (req, res, next) => {
  *       409:
  *         description: Invalid arguments
  */
-router.put('/:id', (req, res, next) => {
+router.put('/:id', accountMiddle.validateAccountArgs, (req, res, next) => {
 	const id = req.params.id;
-	const args = req.body;
-
-    // Validate Args
-    const invalidArgs = Object.keys(args).filter((key) => !putValidArgs.includes(key));
-
-    if (invalidArgs.length) {
-    	res.status(409).json(`Invalid arguments: ${invalidArgs.join(", ")}`);
-    	return;
-    }
 
     accountsModel
-        .update(args, { where: {id} })
+        .update(req.body, { where: {id} })
         .then(([affectedCount]) => {
             if (affectedCount) {
                 res.status(201).json("Account Successfuly Updated");
@@ -196,18 +160,18 @@ router.put('/:id', (req, res, next) => {
         .catch((err) => {
             res.status(500).json("Server internal Error, couldn't update the user, please try late");
         });
-});
+    });
 
 /**
  * @swagger
- * /accounts/{account_name}:
+ * /accounts/{id}:
  *   delete:
  *     summary: Delete Account
  *     description: Delete account by account_name
  *     tags: [Accounts]
  *     parameters:
- *       - name: domain_name
- *         description: Account's domain_name
+ *       - name: id
+ *         description: Account's id
  *         in: path
  *         type: string
  *         required: true

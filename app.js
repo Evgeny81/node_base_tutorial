@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const express = require('express');
+const router = express.Router();
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -8,10 +9,10 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const config = require('@config/config');
 
 
-const indexRouter = require('@app/routes/index');
-const usersRouter = require('@app/routes/users');
-const accountsRouter = require('@app/routes/accounts');
-const tasksRouter = require('@app/routes/tasks');
+const indexRouter = require('@routes/index');
+const usersRouter = require('@routes/users');
+const accountsRouter = require('@routes/accounts');
+const tasksRouter = require('@routes/tasks');
 
 const app = express();
 
@@ -31,22 +32,24 @@ const swaggerSpec = swaggerJSDoc({
             title: 'swagger-express-jsdoc', // Title (required)
             version: '3.0.9', // Version (required)
         },
-        host: config.rest_url(), // Host (optional)
+        host: `${config.host}:${config.port}`, // Host (optional)
         basePath: config.rest_endpoint_base_url(), // Base path (optional)
     },
     apis: ['./app/routes/*'], // Path to the API docs
 });
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/accounts', accountsRouter);
-app.use('/tasks', tasksRouter);
+app.use(config.rest_endpoint_base_url(), router);
 
-app.get('/api-docs.json', function(req, res) {
+router.use('/', indexRouter);
+router.use('/users', usersRouter);
+router.use('/accounts', accountsRouter);
+router.use('/tasks', tasksRouter);
+
+router.get('/api-docs.json', function(req, res) {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);
 });
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+router.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 // catch 404 and forward to error handler

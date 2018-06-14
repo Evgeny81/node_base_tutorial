@@ -8,7 +8,10 @@
   "_moduleAliases": {
     "@root": ".",
     "@app": "./app",
-    "@config": "./app/config"
+    "@config": "./app/config",
+    "@middleware": "./app/middleware",
+    "@models": "./app/models",
+    "@routes": "./app/routes"
   },
   "dependencies": {
     "bcrypt": "^1.0.3",
@@ -22,6 +25,7 @@
     "mongoose": "^5.0.13",
     "morgan": "~1.9.0",
     "mysql2": "^1.5.3",
+    "one-validation": "^2.2.2",
     "sequelize": "^4.37.5",
     "swagger-jsdoc": "^1.9.7",
     "swagger-ui-express": "^3.0.9"
