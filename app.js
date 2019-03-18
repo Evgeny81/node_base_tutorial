@@ -9,6 +9,7 @@ const swaggerJSDoc = require('swagger-jsdoc');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const accountsRouter = require('./routes/accounts');
+const productsRouter = require('./routes/products');
 const tasksRouter = require('./routes/tasks');
 
 const app = express();
@@ -38,6 +39,7 @@ const swaggerSpec = swaggerJSDoc({
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/accounts', accountsRouter);
+app.use('/products', productsRouter);
 app.use('/tasks', tasksRouter);
 
 app.get('/api-docs.json', function(req, res) {

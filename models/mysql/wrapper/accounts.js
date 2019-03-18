@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
 
   accounts.associate = function(models) {
-    // associations can be defined here
+    models.accounts.hasMany(models.Products);
   };
 
   return accounts;
